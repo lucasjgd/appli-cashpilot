@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion / Inscription
+{% endblock %}
+
+{% block body %}
+	<main class="container my-5 content">
+		{% for label, messages in app.flashes %}
+			<div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show m-2" role="alert">
+				{% for message in messages %}
+					{{ message }}
+				{% endfor %}
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+		{% endfor %}
+		<div class="row justify-content-center">
+			<div class="col-md-6">
+				<div class="card p-4 shadow-sm">
+					<ul class="nav nav-tabs" id="authTabs" role="tablist">
+						<li class="nav-item" role="presentation">
+							<button class="nav-link active text-green" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab">Connexion</button>
+						</li>
+						<li class="nav-item" role="presentation">
+							<button class="nav-link text-green" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab">Inscription</button>
+						</li>
+					</ul>
+					<div class="tab-content mt-3" id="authTabsContent">
+
+						<div class="tab-pane fade show active" id="login" role="tabpanel">
+							<form method="POST" action="{{ path('traitement_connexion') }}">
+								<div class="mb-3">
+									<label for="mail-connexion" class="form-label">Adresse e-mail</label>
+									<input type="email" name="mail-connexion" class="form-control" id="mail-connexion" required>
+								</div>
+								<div class="mb-3">
+									<label for="mdp-connexion" class="form-label">Mot de passe</label>
+									<input type="password" class="form-control" name="mdp-connexion" id="mdp-connexion" required>
+								</div>
+								<button type="submit" class="btn btn-primary w-100">Se connecter</button>
+							</form>
+
+						</div>
+
+						<div class="tab-pane fade" id="register" role="tabpanel">
+							<form action="{{ path('traitement-inscription') }}" method="POST">
+								<div class="mb-3">
+									<label for="nom-inscription" class="form-label">Nom</label>
+									<input type="text" class="form-control" id="nom-inscription" name="nom-inscription" required>
+								</div>
+								<div class="mb-3">
+									<label for="mail-inscription" class="form-label">Adresse e-mail</label>
+									<input type="email" class="form-control" id="mail-inscription" name="mail-inscription" required>
+								</div>
+								<div class="mb-3">
+									<label for="mdp-inscription" class="form-label">Mot de passe</label>
+									<input type="password" class="form-control" id="mdp-inscription" name="mdp-inscription" required>
+								</div>
+								<div class="mb-3">
+									<label for="mdpConfirm-inscription" class="form-label">Confirmation du mot de passe</label>
+									<input type="password" class="form-control" id="mdpConfirm-inscription" name="mdpConfirm-inscription" required>
+								</div>
+								<button type="submit" class="btn btn-primary w-100">S'inscrire</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+
+{% endblock %}

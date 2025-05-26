@@ -1,0 +1,60 @@
+body {
+    background-color: #faf7f6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: "Saira", sans-serif !important;
+}
+
+header {
+    background-color: #0b6432;
+}
+
+.text-green {
+    color: #0b6432;
+}
+
+.text-green:hover {
+    color: #0a572b;
+}
+
+.btn-primary {
+    background-color: #0b6432;
+    border-color: #0b6432;
+}
+
+.btn-primary:active {
+    background-color: #0b6432 !important;
+    border-color: #0b6432 !important;
+}
+
+.btn-primary:hover {
+    background-color: #0a572b;
+    border-color: #0a572b;
+}
+
+.content {
+    flex: 1;
+}
+
+.card {
+    width: 500px;
+}
+
+#listeLivrets {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+}
+
+a {
+    text-decoration: none;
+}
+
+footer {
+    background-color: #0b6432;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: relative;
+    width: 100%;
+}

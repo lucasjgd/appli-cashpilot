@@ -20,4 +20,37 @@ class Avoir
 
     #[ORM\Column(name: "budget_max_categ", type: "float")]
     private float $budgetMaxCateg;
+
+    public function getLivret(): ?Livret
+    {
+        return $this->livret;
+    }
+
+    public function setLivret(?Livret $livret): self
+    {
+        $this->livret = $livret;
+        return $this;
+    }
+
+    public function getCategorie(): ?Categorie
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?Categorie $categorie): self
+    {
+        $this->categorie = $categorie;
+        return $this;
+    }
+
+    public function getBudgetMaxCateg(): float
+    {
+        return $this->budgetMaxCateg;
+    }
+
+    public function setBudgetMaxCateg(float $budgetMaxCateg): self
+    {
+        $this->budgetMaxCateg = $budgetMaxCateg;
+        return $this;
+    }
 }

@@ -32,4 +32,47 @@ class Depense
 
     #[ORM\OneToOne(mappedBy: "depense", cascade: ["persist", "remove"])]
     private ?Recurrence $recurrence = null;
+
+    
+    public function getId(): int
+    {
+        return $this->id;
+    }
+    public function getLivret(): ?Livret
+    {
+        return $this->livret;
+    }
+
+    public function getMontant(): float
+    {
+        return $this->montantDepense;
+    }
+
+    public function setMontantDepense(float $montantDepense): self
+    {
+        $this->montantDepense = $montantDepense;
+        return $this;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->descriptionDepense;
+    }
+
+    public function setDescriptionDepense(string $descriptionDepense): self
+    {
+        $this->descriptionDepense = $descriptionDepense;
+        return $this;
+    }
+
+    public function getDate(): \DateTimeInterface
+    {
+        return $this->dateDepense;
+    }
+
+    public function setDateDepense(\DateTimeInterface $dateDepense): self
+    {
+        $this->dateDepense = $dateDepense;
+        return $this;
+    }  
 }

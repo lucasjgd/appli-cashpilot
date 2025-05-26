@@ -26,4 +26,30 @@ class Livret
 
     #[ORM\OneToMany(mappedBy: "livret", targetEntity: Depense::class)]
     private Collection $depenses;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+    public function getNomLivret(): ?string
+    {
+        return $this->nomLivret;
+    }
+
+    public function setNom(string $nomLivret): static
+    {
+        $this->nomLivret = $nomLivret;
+        return $this;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): static
+    {
+        $this->utilisateur = $utilisateur;
+        return $this;
+    }
+
+    public function getAvoirs()
+    {
+        return $this->avoirs;
+    }
 }

@@ -22,4 +22,25 @@ class Categorie
 
     #[ORM\OneToMany(mappedBy: "categorie", targetEntity: Depense::class)]
     private Collection $depenses;
+
+     public function getId(): ?int
+    {
+        return $this->id;   
+    }
+
+    public function getLibelle(): string
+    {
+        return $this->libelle;
+    }
+
+    public function setLibelle(string $libelle): self
+    {
+        $this->libelle = $libelle;
+        return $this;
+    }
+
+    public function getDepenses()
+{
+    return $this->depenses;
+}
 }

@@ -24,8 +24,7 @@
 				<div>
 					<div class="container text-center my-4">
 						<button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addCategorieModal">Ajouter une catégorie</button>
-						<button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addDepenseModal">Ajouter
-																																																															                        une dépense</button>
+						<button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addDepenseModal">Ajouter une dépense</button>
 						<a href="analyse.html" class="btn btn-primary">Analyse du livret</a>
 					</div>
 
@@ -61,11 +60,10 @@
 							</div>
 						</div>
 					</div>
-
 					<div class="modal fade" id="addDepenseModal" tabindex="-1" aria-labelledby="addDepenseModalLabel" aria-hidden="true">
 						<div class="modal-dialog">
 							<div class="modal-content">
-								<form method="POST" action="ajouter_depense.php">
+								<form method="POST" action="{{ path('ajouterDepense') }}">
 									<div class="modal-header">
 										<h5 class="modal-title" id="addDepenseModalLabel">Ajouter une dépense</h5>
 										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
@@ -76,7 +74,7 @@
 											<input type="hidden" id="idLivret" name="idLivret" value="{{ livret.id }}">
 											<select class="form-select" name="categorie_id" id="categorie" required>
 												<option selected disabled>Choisir une catégorie</option>
-												{% for categorie in categories %}
+												{% for categorie in categoriesDansLivret %}
 													<option value="{{categorie.id}}">{{categorie.libelle}}</option>
 												{% endfor %}
 											</select>
@@ -95,26 +93,6 @@
 												Dépense récurrente
 											</label>
 										</div>
-
-										<div id="recurrenceFields" style="display: none;">
-											<div class="mb-3">
-												<label for="frequence" class="form-label">Fréquence</label>
-												<select class="form-select" name="frequence" id="frequence">
-													<option value="" disabled selected>Choisir la fréquence</option>
-													<option value="semaine">Hebdomadaire</option>
-													<option value="mois">Mensuelle</option>
-													<option value="trimestre">Trimestrielle</option>
-												</select>
-											</div>
-											<div class="mb-3">
-												<label for="date_debut" class="form-label">Date de début</label>
-												<input type="date" class="form-control" name="date_debut" id="date_debut">
-											</div>
-											<div class="mb-3">
-												<label for="date_fin" class="form-label">Date de fin</label>
-												<input type="date" class="form-control" name="date_fin" id="date_fin">
-											</div>
-										</div>
 									</div>
 									<div class="modal-footer">
 										<button type="submit" class="btn btn-success">Ajouter</button>
@@ -127,41 +105,76 @@
 				</div>
 			</div>
 
-			<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered">
+			<div class="modal fade" id="modifDepenseModal" tabindex="-1" aria-labelledby="modifDepenseModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
 					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title">Confirmation</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-						</div>
-						<div class="modal-body">
-							Êtes-vous sûr de vouloir supprimer cette dépense ?
-						</div>
-						<div class="modal-footer">
-							<a id="confirmDeleteBtn" href="#" class="btn btn-danger">Supprimer</a>
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-						</div>
+						<form id="formModifDepense" method="POST">
+							<div class="modal-header">
+								<h5 class="modal-title" id="modifDepenseModalLabel">Modifier la dépense</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+							</div>
+							<div class="modal-body">
+								<div class="mb-3">
+									<label for="modifMontantDepense" class="form-label">Montant</label>
+									<input type="number" step="0.01" class="form-control" id="modifMontantDepense" name="montant" required>
+								</div>
+								<div class="mb-3">
+									<label for="modifDescriptionDepense" class="form-label">Description</label>
+									<input type="text" class="form-control" id="modifDescriptionDepense" name="description" required>
+								</div>
+								<div class="mb-3">
+									<label for="modifDateDepense" class="form-label">Date</label>
+									<input type="date" class="form-control" id="modifDateDepense" name="date" required>
+								</div>
+								<div class="form-check mb-3">
+									<input class="form-check-input" type="checkbox" value="1" id="modifRecurrenteDepense" name="recurrente">
+									<label class="form-check-label" for="modifRecurrenteDepense">
+										Dépense récurrente ?
+									</label>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="submit" class="btn btn-primary">Enregistrer</button>
+								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+							</div>
+						</form>
 					</div>
 				</div>
 			</div>
 
-			<div class="modal fade" id="confirmDeleteCategorieModal" tabindex="-1" aria-labelledby="confirmDeleteCategorieModalLabel" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content">
+
+			<div class="modal fade" id="modifCategorieModal" tabindex="-1" aria-labelledby="modifCategorieModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<form method="POST" class="modal-content" id="formModifCategorie">
 						<div class="modal-header">
-							<h5 class="modal-title">Supprimer la catégorie</h5>
+							<h5 class="modal-title" id="modifCategorieModalLabel">Modifier le budget de la catégorie</h5>
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
 						</div>
 						<div class="modal-body">
-							Êtes-vous sûr de vouloir supprimer cette catégorie ? Toutes les dépenses associées seront
-																																																															                        également supprimées.
+							<input type="hidden" name="id_livret" id="modifCategorieLivretId">
+							<input type="hidden" name="id_categ" id="modifCategorieCategId">
+							<div class="mb-3">
+								<label for="modifBudgetCategorie" class="form-label">Budget maximum (€)</label>
+								<input type="number" class="form-control" id="modifBudgetCategorie" name="modifBudget" required>
+							</div>
 						</div>
 						<div class="modal-footer">
+							<button type="submit" class="btn btn-primary">Enregistrer</button>
 							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-							<a id="confirmDeleteCategorieBtn" href="#" class="btn btn-danger">Supprimer</a>
 						</div>
-					</div>
+					</form>
 				</div>
+			</div>
+			<div class="d-flex justify-content-between align-items-center my-3">
+				<a href="{{ path('detailLivret', { id: livret.id, mois: moisPrecedent, annee: anneePrecedente }) }}" class="btn btn-primary">← Mois précédent</a>
+
+				<h5 class="mb-0">
+					{% set moisNom = {'01': 'Janvier', '02': 'Février', '03': 'Mars', '04': 'Avril', '05': 'Mai', '06': 'Juin', '07': 'Juillet', '08': 'Août', '09': 'Septembre', '10': 'Octobre', '11': 'Novembre', '12': 'Décembre'} %}
+					{{ moisNom[('%02d'|format(mois))] }}
+					{{ annee }}
+				</h5>
+
+				<a href="{{ path('detailLivret', { id: livret.id, mois: moisSuivant, annee: anneeSuivante }) }}" class="btn btn-primary">Mois suivant →</a>
 			</div>
 
 
@@ -176,28 +189,37 @@
 									-
 									{% set totalDepenses = 0 %}
 									{% for depense in categorie.depenses %}
-										{% if depense.livret.id == livret.id %}
+										{% if depense.livret.id == livret.id and depense.date >= dateDebut and depense.date < dateFin %}
 											{% set totalDepenses = totalDepenses + depense.montant %}
 										{% endif %}
 									{% endfor %}
-									{{ totalDepenses|number_format(2, ',', ' ') }}
-									€ /
-									{{ avoir.budgetMaxCateg|number_format(2, ',', ' ') }}
-									€
+
+									<span class="ms-1
+																																																																																								                        {{
+																																																																																								                            totalDepenses == avoir.budgetMaxCateg ? 'text-warning' :
+																																																																																								                            (totalDepenses < avoir.budgetMaxCateg ? 'text-success' : 'text-danger')
+																																																																																								                        }}">
+										{{ totalDepenses|number_format(2, ',', ' ') }}
+										/
+										{{ avoir.budgetMaxCateg|number_format(2, ',', ' ') }}
+										€
+									</span>
 								</button>
-								<button class="btn btn-sm btn-outline-secondary ms-4 me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteCategorieModal">
+								<button class="btn btn-sm btn-outline-secondary ms-4 me-2" data-bs-toggle="modal" data-bs-target="#modifCategorieModal" data-livret="{{ avoir.livret.id }}" data-categ="{{ avoir.categorie.id }}" data-budget="{{ avoir.budgetMaxCateg }}">
 									<i class="fa-solid fa-pencil"></i>
 								</button>
-								<button class="btn btn-sm btn-outline-danger ms-2 me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteCategorieModal">
-									<i class="fa-solid fa-xmark"></i>
-								</button>
+								{% if avoir.estActif == true %}
+									<a id="confirmDeleteCategorieBtn" href="{{ path('desactiverCateg', {livretId: livret.id, categId: categorie.id}) }}" class="btn btn-sm btn-outline-danger me-2">
+										<i class="fa-solid fa-xmark"></i>
+									</a>
+								{% endif %}
 							</div>
 						</h2>
 						<div id="cat{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#categoriesAccordion">
 							<div class="accordion-body">
 								<ul class="list-group">
 									{% for depense in categorie.depenses %}
-										{% if depense.livret.id == livret.id %}
+										{% if depense.livret.id == livret.id and depense.date >= dateDebut and depense.date < dateFin %}
 											<li class="list-group-item d-flex justify-content-between align-items-start">
 												<div class="w-25">
 													<div class="d-flex justify-content-between align-items-center">
@@ -207,18 +229,22 @@
 															€
 														</span>
 													</div>
-													<small class="text-muted">Description :
-														{{ depense.description }}</small><br>
-													<small class="text-muted">Date :
-														{{ depense.date|date('Y-m-d') }}</small>
+													<div class="d-flex flex-column">
+														<small class="text-muted">Date :
+															{{ depense.date|date('Y-m-d') }}</small>
+														<small class="text-muted">Est récurrente :
+															{{ depense.estRecurrente ? 'Oui' : 'Non' }}
+														</small>
+													</div>
 												</div>
 												<div>
-													<button class="btn btn-sm btn-secondary ms-2 me-2" data-bs-toggle="modal" data-bs-target="#editDepenseModal-{{ depense.id }}">
+													<button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#modifDepenseModal" data-id="{{ depense.id }}" data-montant="{{ depense.montant }}" data-description="{{ depense.description }}" data-date="{{ depense.date.format('Y-m-d') }}" data-recurrente="{{ depense.estRecurrente ? '1' : '0' }}">
 														<i class="fa-solid fa-pencil"></i>
 													</button>
-													<button class="btn btn-sm btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#confirmDeleteDepenseModal-{{ depense.id }}">
+													<a href="{{ path('supprimerDepense', {livretId: livret.id, depenseId: depense.id}) }}" class="btn btn-sm btn-danger ms-3">
 														<i class="fa-solid fa-xmark"></i>
-													</button>
+													</a>
+
 												</div>
 											</li>
 										{% endif %}
@@ -230,7 +256,7 @@
 						</div>
 					</div>
 				{% else %}
-					<p>Aucune catégorie liée à ce livret.</p>
+					<p class = "text-center mt-5">Aucune catégorie liée à cette période.</p>
 				{% endfor %}
 			</div>
 		</div>

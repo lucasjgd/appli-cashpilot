@@ -30,17 +30,12 @@ class Depense
     #[ORM\JoinColumn(nullable: false)]
     private ?Categorie $categorie = null;
 
-    #[ORM\OneToOne(mappedBy: "depense", cascade: ["persist", "remove"])]
-    private ?Recurrence $recurrence = null;
+    #[ORM\Column(type: "boolean")]
+    private bool $estRecurrente = false;
 
-    
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
-    }
-    public function getLivret(): ?Livret
-    {
-        return $this->livret;
     }
 
     public function getMontant(): float
@@ -74,5 +69,38 @@ class Depense
     {
         $this->dateDepense = $dateDepense;
         return $this;
-    }  
+    }
+
+    public function getLivret(): ?Livret
+    {
+        return $this->livret;
+    }
+
+    public function setLivret(?Livret $livret): self
+    {
+        $this->livret = $livret;
+        return $this;
+    }
+
+    public function getCategorie(): ?Categorie
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?Categorie $categorie): self
+    {
+        $this->categorie = $categorie;
+        return $this;
+    }
+
+    public function estRecurrente(): bool
+    {
+        return $this->estRecurrente;
+    }
+
+    public function setEstRecurrente(bool $estRecurrente): self
+    {
+        $this->estRecurrente = $estRecurrente;
+        return $this;
+    }
 }

@@ -21,6 +21,9 @@ class Avoir
     #[ORM\Column(name: "budget_max_categ", type: "float")]
     private float $budgetMaxCateg;
 
+    #[ORM\Column(type: "boolean", options: ["default" => true])]
+    private bool $actif = true;
+
     public function getLivret(): ?Livret
     {
         return $this->livret;
@@ -51,6 +54,17 @@ class Avoir
     public function setBudgetMaxCateg(float $budgetMaxCateg): self
     {
         $this->budgetMaxCateg = $budgetMaxCateg;
+        return $this;
+    }
+
+    public function estActif(): bool
+    {
+        return $this->actif;
+    }
+
+    public function setActif(bool $actif): self
+    {
+        $this->actif = $actif;
         return $this;
     }
 }

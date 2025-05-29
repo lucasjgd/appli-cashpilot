@@ -11,71 +11,73 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Livret;
 use App\Entity\Avoir;
 use App\Entity\Categorie;
+use App\Entity\Depense;
+use DateTime;
+use DateInterval;
 
 final class DetailLivretController extends AbstractController
 {
     #[Route('/lesLivrets/{id}/detail', name: 'detailLivret')]
-    public function detail(int $id, EntityManagerInterface $em): Response
+    public function detail(int $id, Request $request, EntityManagerInterface $em): Response
     {
         $livret = $em->getRepository(Livret::class)->find($id);
-        $categories = $em->getRepository(Categorie::class)->categOrdreAlpha();
-        $avoirs = $livret->getAvoirs();
-
         if (!$livret) {
             throw $this->createNotFoundException('Livret non trouvé');
         }
 
+        $mois = $request->query->getInt('mois', (int) date('m'));
+        $annee = $request->query->getInt('annee', (int) date('Y'));
+
+        $dateDebut = new DateTime("$annee-$mois-01");
+        $dateFin = (clone $dateDebut)->add(new DateInterval('P1M'));
+
+        $moisPrecedent = $mois == 1 ? 12 : $mois - 1;
+        $anneePrecedente = $mois == 1 ? $annee - 1 : $annee;
+
+        $moisSuivant = $mois == 12 ? 1 : $mois + 1;
+        $anneeSuivante = $mois == 12 ? $annee + 1 : $annee;
+
+        $avoirs = $livret->getAvoirs();
+        $avoirsFiltrés = [];
+
+        foreach ($avoirs as $avoir) {
+            $categorie = $avoir->getCategorie();
+
+            $aDesDepensesDansLeMois = false;
+            foreach ($categorie->getDepenses() as $depense) {
+                if (
+                    $depense->getLivret()->getId() === $livret->getId() &&
+                    $depense->getDate() >= $dateDebut &&
+                    $depense->getDate() < $dateFin
+                ) {
+                    $aDesDepensesDansLeMois = true;
+                    break;
+                }
+            }
+
+            if ($avoir->estActif() || $aDesDepensesDansLeMois) {
+                if (!in_array($avoir, $avoirsFiltrés, true)) {
+                    $avoirsFiltrés[] = $avoir;
+                }
+            }
+        }
+
+        $categories = $em->getRepository(Categorie::class)->categOrdreAsc();
+        $categoriesDansLivret = $em->getRepository(Categorie::class)->categDansLivret($livret->getId());
+
         return $this->render('detailLivret.html.twig', [
             'livret' => $livret,
             'categories' => $categories,
-            'avoirs' => $avoirs,
+            'categoriesDansLivret' => $categoriesDansLivret,
+            'avoirs' => $avoirsFiltrés,
+            'mois' => $mois,
+            'annee' => $annee,
+            'dateDebut' => $dateDebut,
+            'dateFin' => $dateFin,
+            'moisPrecedent' => $moisPrecedent,
+            'anneePrecedente' => $anneePrecedente,
+            'moisSuivant' => $moisSuivant,
+            'anneeSuivante' => $anneeSuivante,
         ]);
     }
-
-    #[Route('/lesLivrets/{id}/detail/ajoutCategLivret', name: 'ajoutCategLivret', methods: ['POST'])]
-    public function categDansLivret(int $id, Request $request, EntityManagerInterface $em, SessionInterface $session): Response
-    {
-        $sessionUtilisateur = $session->get('utilisateur');
-        if (!$sessionUtilisateur) {
-            $this->addFlash('danger', "Vous devez être connecté pour ajouter une catégorie au livret.");
-            return $this->redirectToRoute('connexion');
-        }
-
-        $livret = $em->getRepository(Livret::class)->find($id);
-        if (!$livret) {
-            $this->addFlash('danger', 'Livret non trouvé.');
-            return $this->redirectToRoute('detailLivret', ['id' => $id]);
-        }
-
-        $categorieId = $request->request->get('categorie_id');
-        $budgetMax = $request->request->get('budget');
-
-        $categorie = $em->getRepository(Categorie::class)->find($categorieId);
-        if (!$categorie) {
-            $this->addFlash('danger', 'Catégorie invalide.');
-            return $this->redirectToRoute('detailLivret', ['id' => $id]);
-        }
-
-        $existant = $em->getRepository(Avoir::class)->findOneBy([
-            'livret' => $livret,
-            'categorie' => $categorie,
-        ]);
-        if ($existant) {
-            $this->addFlash('warning', 'Cette catégorie est déjà ajoutée à ce livret.');
-            return $this->redirectToRoute('detailLivret', ['id' => $id]);
-        }
-
-        $avoir = new Avoir();
-        $avoir->setLivret($livret);
-        $avoir->setCategorie($categorie);
-        $avoir->setBudgetMaxCateg((float) $budgetMax);
-
-        $em->persist($avoir);
-        $em->flush();
-
-        $this->addFlash('success', 'Catégorie ajoutée au livret avec succès !');
-
-        return $this->redirectToRoute('detailLivret', ['id' => $id]);
-    }
-
 }

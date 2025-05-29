@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Categorie;
+use App\Entity\Avoir;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,13 +17,29 @@ class CategorieRepository extends ServiceEntityRepository
         parent::__construct($registry, Categorie::class);
     }
 
-    public function categOrdreAlpha(): ?array
+    public function categOrdreAsc(): array
     {
         return $this->createQueryBuilder('c')
-            ->orderBy('c.libelle', 'ASC')
-            ->getQuery()
-            ->getResult()
-        ;
+        ->orderBy('c.libelle', 'ASC')
+        ->getQuery()
+        ->getResult();
+    }
+
+    public function categDansLivret(int $id): array
+    {
+        $em = $this->getEntityManager();
+
+        $subQb = $em->createQueryBuilder()
+            ->select('IDENTITY(a.categorie)')
+            ->from('App\Entity\Avoir', 'a')
+            ->where('a.livret = :livretId');
+
+        $qb = $this->createQueryBuilder('c')
+            ->where('c.id IN (' . $subQb->getDQL() . ')')
+            ->setParameter('livretId', $id)
+            ->orderBy('c.libelle', 'ASC');
+
+        return $qb->getQuery()->getResult();
     }
 
     //    /**

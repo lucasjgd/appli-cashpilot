@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Depense;
+use App\Entity\Recurrence;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -15,6 +16,17 @@ class DepenseRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Depense::class);
     }
+
+    public function depensesDuMois(\DateTime $dateDebut, \DateTime $dateFin): array
+{
+    return $this->createQueryBuilder('d')
+        ->where('d.dateDepense >= :debut')
+        ->andWhere('d.dateDepense < :fin')
+        ->setParameter('debut', $dateDebut)
+        ->setParameter('fin', $dateFin)
+        ->getQuery()
+        ->getResult();
+}
 
     //    /**
     //     * @return Depense[] Returns an array of Depense objects

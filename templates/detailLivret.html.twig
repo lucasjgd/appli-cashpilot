@@ -23,9 +23,11 @@
 				</div>
 				<div>
 					<div class="container text-center my-4">
-						<button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addCategorieModal">Ajouter une catégorie</button>
-						<button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addDepenseModal">Ajouter une dépense</button>
-						<a href="analyse.html" class="btn btn-primary">Analyse du livret</a>
+						{% if estMoisActuelOuFutur %}
+							<button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addCategorieModal">Ajouter une catégorie</button>
+							<button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addDepenseModal">Ajouter une dépense</button>
+						{% endif %}
+						<a href="{{ path('analyse', {id: livret.id}) }}" class="btn btn-primary">Analyse du livret</a>
 					</div>
 
 					<div class="modal fade" id="addCategorieModal" tabindex="-1" aria-labelledby="addCategorieModalLabel" aria-hidden="true">
@@ -122,10 +124,6 @@
 									<label for="modifDescriptionDepense" class="form-label">Description</label>
 									<input type="text" class="form-control" id="modifDescriptionDepense" name="description" required>
 								</div>
-								<div class="mb-3">
-									<label for="modifDateDepense" class="form-label">Date</label>
-									<input type="date" class="form-control" id="modifDateDepense" name="date" required>
-								</div>
 								<div class="form-check mb-3">
 									<input class="form-check-input" type="checkbox" value="1" id="modifRecurrenteDepense" name="recurrente">
 									<label class="form-check-label" for="modifRecurrenteDepense">
@@ -179,87 +177,104 @@
 
 
 			<div class="accordion" id="categoriesAccordion">
+				{% set maintenant = "now"|date("Y-m-d") %}
+				{% set periodeEstDansLePasse = dateFin|date("Y-m-d") < maintenant %}
+				{% set auMoinsUneCategorieAffichee = false %}
+
 				{% for avoir in avoirs %}
 					{% set categorie = avoir.categorie %}
-					<div class="accordion-item">
-						<h2 class="accordion-header" id="heading{{ loop.index }}">
-							<div class="d-flex justify-content-between align-items-center">
-								<button class="accordion-button {% if loop.first %} {% else %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#cat{{ loop.index }}" aria-expanded="{{ loop.first ? 'true' : 'false' }}" aria-controls="cat{{ loop.index }}">
-									{{ categorie.libelle }}
-									-
-									{% set totalDepenses = 0 %}
-									{% for depense in categorie.depenses %}
-										{% if depense.livret.id == livret.id and depense.date >= dateDebut and depense.date < dateFin %}
-											{% set totalDepenses = totalDepenses + depense.montant %}
-										{% endif %}
-									{% endfor %}
 
-									<span class="ms-1
-																																																																																								                        {{
-																																																																																								                            totalDepenses == avoir.budgetMaxCateg ? 'text-warning' :
-																																																																																								                            (totalDepenses < avoir.budgetMaxCateg ? 'text-success' : 'text-danger')
-																																																																																								                        }}">
-										{{ totalDepenses|number_format(2, ',', ' ') }}
-										/
-										{{ avoir.budgetMaxCateg|number_format(2, ',', ' ') }}
-										€
-									</span>
-								</button>
-								<button class="btn btn-sm btn-outline-secondary ms-4 me-2" data-bs-toggle="modal" data-bs-target="#modifCategorieModal" data-livret="{{ avoir.livret.id }}" data-categ="{{ avoir.categorie.id }}" data-budget="{{ avoir.budgetMaxCateg }}">
-									<i class="fa-solid fa-pencil"></i>
-								</button>
-								{% if avoir.estActif == true %}
-									<a id="confirmDeleteCategorieBtn" href="{{ path('desactiverCateg', {livretId: livret.id, categId: categorie.id}) }}" class="btn btn-sm btn-outline-danger me-2">
-										<i class="fa-solid fa-xmark"></i>
-									</a>
-								{% endif %}
-							</div>
-						</h2>
-						<div id="cat{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#categoriesAccordion">
-							<div class="accordion-body">
-								<ul class="list-group">
-									{% for depense in categorie.depenses %}
-										{% if depense.livret.id == livret.id and depense.date >= dateDebut and depense.date < dateFin %}
-											<li class="list-group-item d-flex justify-content-between align-items-start">
-												<div class="w-25">
-													<div class="d-flex justify-content-between align-items-center">
-														<strong>{{ depense.description }}</strong>
-														<span class="badge bg-secondary rounded-pill fs-6">
-															{{ depense.montant|number_format(2, ',', ' ') }}
-															€
-														</span>
-													</div>
-													<div class="d-flex flex-column">
-														<small class="text-muted">Date :
-															{{ depense.date|date('Y-m-d') }}</small>
-														<small class="text-muted">Est récurrente :
-															{{ depense.estRecurrente ? 'Oui' : 'Non' }}
-														</small>
-													</div>
-												</div>
-												<div>
-													<button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#modifDepenseModal" data-id="{{ depense.id }}" data-montant="{{ depense.montant }}" data-description="{{ depense.description }}" data-date="{{ depense.date.format('Y-m-d') }}" data-recurrente="{{ depense.estRecurrente ? '1' : '0' }}">
-														<i class="fa-solid fa-pencil"></i>
-													</button>
-													<a href="{{ path('supprimerDepense', {livretId: livret.id, depenseId: depense.id}) }}" class="btn btn-sm btn-danger ms-3">
-														<i class="fa-solid fa-xmark"></i>
-													</a>
+					{# Compter le nombre de dépenses dans la période #}
+					{% set nbDepenses = 0 %}
+					{% for depense in categorie.depenses %}
+						{% if depense.livret.id == livret.id and depense.date >= dateDebut and depense.date < dateFin %}
+							{% set nbDepenses = nbDepenses + 1 %}
+						{% endif %}
+					{% endfor %}
 
-												</div>
-											</li>
+					{# Vérifie si la catégorie doit être affichée #}
+					{% if avoir.estActif and (not periodeEstDansLePasse or nbDepenses > 0) %}
+						{% set auMoinsUneCategorieAffichee = true %}
+						<div class="accordion-item">
+							<h2 class="accordion-header" id="heading{{ loop.index }}">
+								<div class="d-flex justify-content-between align-items-center">
+									<button class="accordion-button {% if loop.first %} {% else %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#cat{{ loop.index }}" aria-expanded="{{ loop.first ? 'true' : 'false' }}" aria-controls="cat{{ loop.index }}">
+										{{ categorie.libelle }}
+										-
+										{% set totalDepenses = 0 %}
+										{% for depense in categorie.depenses %}
+											{% if depense.livret.id == livret.id and depense.date >= dateDebut and depense.date < dateFin %}
+												{% set totalDepenses = totalDepenses + depense.montant %}
+											{% endif %}
+										{% endfor %}
+										<span class="ms-1 {{ totalDepenses == avoir.budgetMaxCateg ? 'text-warning' : (totalDepenses < avoir.budgetMaxCateg ? 'text-success' : 'text-danger') }}">
+											{{ totalDepenses|number_format(2, ',', ' ') }}
+											/
+											{{ avoir.budgetMaxCateg|number_format(2, ',', ' ') }}
+											€
+										</span>
+									</button>
+									{% if estMoisActuelOuFutur %}
+										<button class="btn btn-sm btn-outline-secondary ms-4 me-2" data-bs-toggle="modal" data-bs-target="#modifCategorieModal" data-livret="{{ avoir.livret.id }}" data-categ="{{ avoir.categorie.id }}" data-budget="{{ avoir.budgetMaxCateg }}">
+											<i class="fa-solid fa-pencil"></i>
+										</button>
+										{% if avoir.estActif %}
+											<a id="confirmDeleteCategorieBtn" href="{{ path('desactiverCateg', {livretId: livret.id, categId: categorie.id}) }}" class="btn btn-sm btn-outline-danger me-2">
+												<i class="fa-solid fa-xmark"></i>
+											</a>
 										{% endif %}
-									{% else %}
-										<li class="list-group-item">Aucune dépense dans cette catégorie.</li>
-									{% endfor %}
-								</ul>
+									{% endif %}
+								</div>
+							</h2>
+							<div id="cat{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#categoriesAccordion">
+								<div class="accordion-body">
+									<ul class="list-group">
+										{% set depenseAffichee = false %}
+										{% for depense in categorie.depenses %}
+											{% if depense.livret.id == livret.id and depense.date >= dateDebut and depense.date < dateFin %}
+												{% set depenseAffichee = true %}
+												<li class="list-group-item d-flex justify-content-between align-items-start">
+													<div class="w-25">
+														<div class="d-flex justify-content-between align-items-center">
+															<strong>{{ depense.description }}</strong>
+															<span class="badge bg-secondary rounded-pill fs-6">
+																{{ depense.montant|number_format(2, ',', ' ') }}
+																€
+															</span>
+														</div>
+														<div class="d-flex flex-column">
+															<small class="text-muted">Date :
+																{{ depense.date|date('Y-m-d') }}</small>
+															<small class="text-muted">Est récurrente :
+																{{ depense.estRecurrente ? 'Oui' : 'Non' }}</small>
+														</div>
+													</div>
+													<div>
+														{% if estMoisActuelOuFutur %}
+															<button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#modifDepenseModal" data-id="{{ depense.id }}" data-montant="{{ depense.montant }}" data-description="{{ depense.description }}" data-date="{{ depense.date.format('Y-m-d') }}" data-recurrente="{{ depense.estRecurrente ? '1' : '0' }}">
+																<i class="fa-solid fa-pencil"></i>
+															</button>
+															<a href="{{ path('supprimerDepense', {livretId: livret.id, depenseId: depense.id}) }}" class="btn btn-sm btn-danger ms-3">
+																<i class="fa-solid fa-xmark"></i>
+															</a>
+														{% endif %}
+													</div>
+												</li>
+											{% endif %}
+										{% endfor %}
+										{% if not depenseAffichee %}
+											<li class="list-group-item">Aucune dépense dans cette catégorie.</li>
+										{% endif %}
+									</ul>
+								</div>
 							</div>
 						</div>
-					</div>
-				{% else %}
-					<p class = "text-center mt-5">Aucune catégorie liée à cette période.</p>
+					{% endif %}
 				{% endfor %}
+				{% if not auMoinsUneCategorieAffichee %}
+					<p class="text-center mt-5">Aucune catégorie liée à cette période.</p>
+				{% endif %}
 			</div>
 		</div>
 	</main>
-
 {% endblock %}

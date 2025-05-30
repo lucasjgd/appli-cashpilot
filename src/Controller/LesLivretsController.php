@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Livret;
+use App\Entity\Depense;
+use App\Entity\Avoir;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -78,5 +80,28 @@ final class LesLivretsController extends AbstractController
         $this->addFlash('success', "Livret modifié avec succès !");
         return $this->redirectToRoute('lesLivrets');
     }
+    #[Route('/supprimerLivret/{id}', name: 'supprimerLivret', methods: ['GET'])]
+    public function supprimerLivret(int $id, Request $request, EntityManagerInterface $em): Response
+    {
+        $livret = $em->getRepository(Livret::class)->find($id);
 
+        if (!$livret) {
+            $this->addFlash('danger', "Livret non trouvé.");
+            return $this->redirectToRoute('lesLivrets');
+        } else {
+            $depenses = $em->getRepository(Depense::class)->findBy(['livret' => $livret]);
+            $avoirs = $em->getRepository(Avoir::class)->findBy(['livret' => $livret]);
+            foreach ($depenses as $d) {
+                $em->remove($d);
+            }
+            foreach ($avoirs as $a) {
+                $em->remove($a);
+            }
+            $em->remove($livret);
+        }
+        $em->flush();
+
+        $this->addFlash('success', "Livret supprimé avec succès !");
+        return $this->redirectToRoute('lesLivrets');
+    }
 }

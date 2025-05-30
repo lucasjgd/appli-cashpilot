@@ -27,33 +27,61 @@ final class CategorieController extends AbstractController
         }
 
         $livret = $em->getRepository(Livret::class)->find($id);
-        $categorie = $em->getRepository(Categorie::class)->find($categorieId);
+        $selectedCategorie = $em->getRepository(Categorie::class)->find($categorieId);
 
-        if (!$livret || !$categorie) {
+        if (!$livret || !$selectedCategorie) {
             $this->addFlash('danger', 'Livret ou catégorie introuvable.');
             return $this->redirectToRoute('detailLivret', ['id' => $id]);
         }
 
-        $avoirExistant = $em->getRepository(Avoir::class)->findOneBy([
+        $avoirActif = $em->getRepository(Avoir::class)->findOneBy([
             'livret' => $livret,
-            'categorie' => $categorie,
+            'categorie' => $selectedCategorie,
+            'actif' => true
         ]);
 
-        if ($avoirExistant) {
+        if ($avoirActif) {
             $this->addFlash('danger', 'Cette catégorie est déjà présente dans ce livret.');
             return $this->redirectToRoute('detailLivret', ['id' => $id]);
         }
 
+        $avoirsDesactives = $em->getRepository(Avoir::class)->findBy([
+            'livret' => $livret,
+            'actif' => false
+        ]);
+
+        foreach ($avoirsDesactives as $avoirDesactive) {
+            $categ = $avoirDesactive->getCategorie();
+            if (strtolower($categ->getLibelle()) === strtolower($selectedCategorie->getLibelle())) {
+                $nouvelleCategorie = new Categorie();
+                $nouvelleCategorie->setLibelle($categ->getLibelle());
+                $em->persist($nouvelleCategorie);
+
+                $nouvelAvoir = new Avoir();
+                $nouvelAvoir->setLivret($livret);
+                $nouvelAvoir->setCategorie($nouvelleCategorie);
+                $nouvelAvoir->setBudgetMaxCateg((float) $budget);
+                $nouvelAvoir->setActif(true);
+
+                $em->persist($nouvelAvoir);
+                $em->flush();
+
+                $this->addFlash('success', 'Nouvelle catégorie ajoutée (même nom que l\'ancienne désactivée).');
+                return $this->redirectToRoute('detailLivret', ['id' => $id]);
+            }
+        }
+
+        // Si aucune catégorie désactivée ne porte ce nom, on ajoute normalement celle sélectionnée
         $avoir = new Avoir();
         $avoir->setLivret($livret);
-        $avoir->setCategorie($categorie);
+        $avoir->setCategorie($selectedCategorie);
         $avoir->setBudgetMaxCateg((float) $budget);
         $avoir->setActif(true);
 
         $em->persist($avoir);
         $em->flush();
-        $this->addFlash('success', 'Catégorie ajoutée au livret avec succès !');
 
+        $this->addFlash('success', 'Catégorie ajoutée au livret avec succès !');
         return $this->redirectToRoute('detailLivret', ['id' => $id]);
     }
 

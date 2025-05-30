@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Analyse du Livret
+{% endblock %}
+
+{% block body %}
+	<main class="content m-5">
+		<a href="{{ path('detailLivret', { id: livret.id }) }}" class="btn btn-secondary mb-2">Retour au livret</a>
+		<h2 class = "text-center">Analyse - Livret
+			{{ livret.nomLivret }}</h2>
+
+		<div class="mt-5">
+			<canvas id="donut"></canvas>
+		</div>
+	</main>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script>
+		const labels = {{ labels|raw }};
+const montants = {{ montants|raw }};
+
+const donut = document.getElementById('donut');
+
+new Chart(donut, {
+type: 'doughnut',
+data: {
+labels: labels,
+datasets: [
+{
+label: 'Total dépenses ',
+data: montants,
+hoverOffset: 10
+}
+]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false
+}
+});
+	</script>
+{% endblock %}

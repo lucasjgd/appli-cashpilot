@@ -39,11 +39,10 @@
 										<i class="fa-solid fa-pencil"></i>
 									</button>
 
-
-									<button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteLivretModal">
+									<a href="{{ path('supprimerLivret', {id: livret.id}) }}" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2">
 										<i class="fa-solid fa-xmark"></i>
-									</button>
-
+									</a>
+									
 									<h5 class="card-title fs-4">{{ livret.nomLivret }}</h5>
 									<div class="d-flex justify-content-end">
 										<a href="{{ path('detailLivret', { id: livret.id }) }}" class="text-green fw-bold">Accéder au livret</a>

@@ -56,6 +56,7 @@ final class DepenseController extends AbstractController
 
         return $this->redirectToRoute('detailLivret', ['id' => $idLivret]);
     }
+
     #[Route('/modifierDepense/{id}', name: 'modifierDepense', methods: ['POST'])]
     public function modifierDepense(int $id, Request $request, EntityManagerInterface $em): Response
     {
@@ -68,17 +69,15 @@ final class DepenseController extends AbstractController
 
         $montant = $request->request->get('montant');
         $description = $request->request->get('description');
-        $date = $request->request->get('date');
         $recurrente = $request->request->get('recurrente');
 
-        if (!$montant || !$description || !$date) {
+        if (!$montant || !$description) {
             $this->addFlash('danger', 'Tous les champs sont obligatoires.');
             return $this->redirectToRoute('detailLivret', ['id' => $depense->getLivret()->getId()]);
         }
 
         $depense->setMontantDepense((float) $montant);
         $depense->setDescriptionDepense($description);
-        $depense->setDateDepense(new \DateTime($date));
         $depense->setEstRecurrente((bool) $recurrente);
 
         $em->flush();
@@ -86,6 +85,7 @@ final class DepenseController extends AbstractController
         $this->addFlash('success', 'Dépense modifiée avec succès.');
         return $this->redirectToRoute('detailLivret', ['id' => $depense->getLivret()->getId()]);
     }
+
 
     #[Route('/lesLivrets/{livretId}/supprimerDepense/{depenseId}', name: 'supprimerDepense', methods: ['GET'])]
     public function supprimerDepense(int $livretId, int $depenseId, EntityManagerInterface $em): Response

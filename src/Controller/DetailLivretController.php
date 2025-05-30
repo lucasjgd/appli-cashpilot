@@ -5,13 +5,11 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Livret;
 use App\Entity\Avoir;
 use App\Entity\Categorie;
-use App\Entity\Depense;
 use DateTime;
 use DateInterval;
 
@@ -38,10 +36,12 @@ final class DetailLivretController extends AbstractController
         $anneeSuivante = $mois == 12 ? $annee + 1 : $annee;
 
         $avoirs = $livret->getAvoirs();
-        $avoirsFiltrés = [];
+        $avoirsParNom = [];
 
+        // Constitution de la liste des avoirs filtrés sur le libellé
         foreach ($avoirs as $avoir) {
             $categorie = $avoir->getCategorie();
+            $nomCategorie = strtolower(trim($categorie->getLibelle()));
 
             $aDesDepensesDansLeMois = false;
             foreach ($categorie->getDepenses() as $depense) {
@@ -55,21 +55,65 @@ final class DetailLivretController extends AbstractController
                 }
             }
 
-            if ($avoir->estActif() || $aDesDepensesDansLeMois) {
-                if (!in_array($avoir, $avoirsFiltrés, true)) {
-                    $avoirsFiltrés[] = $avoir;
+            if (!isset($avoirsParNom[$nomCategorie])) {
+                if ($avoir->estActif() || $aDesDepensesDansLeMois) {
+                    $avoirsParNom[$nomCategorie] = $avoir;
+                }
+            } else {
+                $avoirExistant = $avoirsParNom[$nomCategorie];
+                if (!$avoir->estActif() && $aDesDepensesDansLeMois && ($avoirExistant->estActif() || !$avoirExistant->estActif())) {
+                    $avoirsParNom[$nomCategorie] = $avoir;
                 }
             }
         }
 
-        $categories = $em->getRepository(Categorie::class)->categOrdreAsc();
-        $categoriesDansLivret = $em->getRepository(Categorie::class)->categDansLivret($livret->getId());
+        $avoirsFiltres = array_values($avoirsParNom);
+
+        $categoriesToutes = $em->getRepository(Categorie::class)->categOrdreAsc();
+
+        $categoriesDejaUtilisees = [];
+        foreach ($avoirsFiltres as $a) {
+            $categorie = $a->getCategorie();
+            $categoriesDejaUtilisees[] = $categorie;
+        }
+
+        $categoriesDisponibles = [];
+        foreach ($categoriesToutes as $categorie) {
+           
+
+            $estDejaUtilisee = false;
+
+            foreach ($categoriesDejaUtilisees as $categorieUtilisee) {
+                if ($categorie['libelle'] == $categorieUtilisee->getLibelle()) {
+                    $estDejaUtilisee = true;
+                    break;
+                }
+            }
+
+            if (!$estDejaUtilisee) {
+                $categoriesDisponibles[] = $categorie;
+            }
+        }
+
+        $categoriesDansLivret = [];
+        foreach ($avoirsFiltres as $a) {
+            $cat = $a->getCategorie();
+            if (!in_array($cat, $categoriesDansLivret, true)) {
+                $categoriesDansLivret[] = $cat;
+            }
+        }
+
+        $aujourdhui = new DateTime();
+        $moisActuel = (int) $aujourdhui->format('m');
+        $anneeActuelle = (int) $aujourdhui->format('Y');
+        $estMoisActuelOuFutur = ($annee > $anneeActuelle) || ($annee == $anneeActuelle && $mois >= $moisActuel);
 
         return $this->render('detailLivret.html.twig', [
             'livret' => $livret,
-            'categories' => $categories,
+            'categories' => $categoriesDisponibles,
             'categoriesDansLivret' => $categoriesDansLivret,
-            'avoirs' => $avoirsFiltrés,
+            'estMoisActuelOuFutur' => $estMoisActuelOuFutur,
+            'avoirs' => $avoirsFiltres,
             'mois' => $mois,
             'annee' => $annee,
             'dateDebut' => $dateDebut,

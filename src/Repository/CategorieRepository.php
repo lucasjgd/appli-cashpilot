@@ -20,10 +20,13 @@ class CategorieRepository extends ServiceEntityRepository
     public function categOrdreAsc(): array
     {
         return $this->createQueryBuilder('c')
-        ->orderBy('c.libelle', 'ASC')
-        ->getQuery()
-        ->getResult();
+            ->select('MIN(c.id) as id', 'c.libelle')
+            ->groupBy('c.libelle')
+            ->orderBy('c.libelle', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
+
 
     public function categDansLivret(int $id): array
     {

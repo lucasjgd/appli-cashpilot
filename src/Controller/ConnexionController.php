@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Utilisateur;
+use App\Entity\Client;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -50,6 +51,7 @@ class ConnexionController extends AbstractController
             'id' => $utilisateur->getId(),
             'nom' => $utilisateur->getNom(),
             'email' => $utilisateur->getMail(),
+            'role' => (new \ReflectionClass($utilisateur))->getShortName(),
         ]);
 
         return $this->redirectToRoute('lesLivrets');
@@ -58,7 +60,7 @@ class ConnexionController extends AbstractController
     #[Route('/traitement-inscription', name: 'traitement-inscription')]
     public function traitementInscription(Request $request, EntityManagerInterface $em): Response
     {
-        $utilisateur = new Utilisateur();
+        $utilisateur = new Client();
 
         if ($request->isMethod('POST')) {
             $nom = $request->request->get('nom-inscription');

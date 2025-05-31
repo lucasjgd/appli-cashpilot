@@ -1,0 +1,139 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des utilisateurs
+{% endblock %}
+
+{% block body %}
+
+	{% for label, messages in app.flashes %}
+		<div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show m-2" role="alert">
+			{% for message in messages %}
+				{{ message }}
+			{% endfor %}
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	{% endfor %}
+
+	<main class="m-5 content">
+
+		<div>
+			<h1 class="mb-4 text-center">Gestion des Utilisateurs</h1>
+
+			<div class="d-flex justify-content-end mb-3">
+				<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajoutUtilisateurModal">Ajouter un utilisateur</button>
+			</div>
+
+			<table class="table table-bordered table-hover">
+				<thead>
+					<tr>
+						<th>Nom</th>
+						<th>Email</th>
+						<th>Rôle</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for utilisateur in utilisateurs %}
+						<tr>
+							<td>{{ utilisateur.nom }}</td>
+							<td>{{ utilisateur.mail }}</td>
+							<td>{{ utilisateur.role }}</td>
+							<td class="d-flex">
+								<button class="btn btn-warning btn-sm me-3" data-bs-toggle="modal" data-bs-target="#modifUtilisateurModal" data-id="{{ utilisateur.id }}" data-nom="{{ utilisateur.nom }}" data-mail="{{ utilisateur.mail }}" data-role="{{ utilisateur.role }}">
+									Modifier
+								</button>
+								<form class="btn-suppr" method="POST" action="{{ path('gestion_utilisateur_suppr', { id: utilisateur.id }) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+									<button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+								</form>
+							</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="4" class="text-center">Aucun utilisateur trouvé.</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			<div class="d-flex justify-content-center mt-4">
+				{{ knp_pagination_render(utilisateurs) }}</div>
+		</div>
+
+		<div class="modal fade" id="ajoutUtilisateurModal" tabindex="-1" aria-labelledby="ajoutUtilisateurModal" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<form method="POST" action="{{ path('gestion_utilisateur_ajout') }}">
+						<div class="modal-header">
+							<h5 class="modal-title" id="ajoutUtilisateurModal">Ajouter un utilisateur</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+						</div>
+						<div class="modal-body">
+							<div class="mb-3">
+								<label class="form-label">Nom</label>
+								<input type="text" name="nom" class="form-control" required>
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Email</label>
+								<input type="email" name="mail" class="form-control" required>
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Mot de passe</label>
+								<input type="password" name="mdp" class="form-control" required>
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Rôle</label>
+								<select name="role" class="form-select" required>
+									<option value="admin">Admin</option>
+									<option value="client">Client</option>
+								</select>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+							<button type="submit" class="btn btn-primary">Ajouter</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="modifUtilisateurModal" tabindex="-1" aria-labelledby="modifUtilisateurModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<form method="POST" id="modifUtilisateurForm">
+						<div class="modal-header">
+							<h5 class="modal-title" id="modifUtilisateurModalLabel">Modifier un utilisateur</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+						</div>
+						<div class="modal-body">
+							<input type="hidden" name="id" id="modif-id">
+							<div class="mb-3">
+								<label class="form-label">Nom</label>
+								<input type="text" name="modif-nom" id="modif-nom" class="form-control" required>
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Email</label>
+								<input type="email" name="modif-mail" id="modif-mail" class="form-control" required>
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Mot de passe</label>
+								<input type="password" name="modif-mdp" id="modif-mdp" class="form-control">
+								<label class="fst-italic mt-1">Laissez vide pour conserver.</label>
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Rôle</label>
+								<select name="modif-role" id="modif-role" class="form-select" required>
+									<option value="admin">Admin</option>
+									<option value="client">Client</option>
+								</select>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+							<button type="submit" class="btn btn-primary">Enregistrer</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</main>
+{% endblock %}

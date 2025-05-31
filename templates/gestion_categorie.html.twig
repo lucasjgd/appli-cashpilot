@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Catégories
+{% endblock %}
+
+{% block body %}
+	{% for label, messages in app.flashes %}
+		<div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show m-2" role="alert">
+			{% for message in messages %}
+				{{ message }}
+			{% endfor %}
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	{% endfor %}
+	<main class="m-5 content">
+		<h1 class="text-center mb-4">Gestion des Catégories</h1>
+
+		<div class="d-flex justify-content-end mb-3">
+			<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajoutCategorieModal">Ajouter une catégorie</button>
+		</div>
+
+		<table class="table table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>Libellé</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for categorie in categories %}
+					<tr>
+						<td>{{ categorie.libelle }}</td>
+						<td class="d-flex">
+							<button class="btn btn-warning btn-sm me-3" data-bs-toggle="modal" data-bs-target="#modifCategorieModal" data-id="{{ categorie.id }}" data-libelle="{{ categorie.libelle }}">
+								Modifier
+							</button>
+							<form method="POST" action="{{ path('gestion_categorie_suppr', { id: categorie.id }) }}" onsubmit="return confirm('Supprimer cette catégorie ?');">
+								<button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+							</form>
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="2" class="text-center">Aucune catégorie trouvée.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</main>
+
+	<div class="modal fade" id="ajoutCategorieModal" tabindex="-1" aria-labelledby="ajoutCategorieModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<form method="POST" action="{{ path('gestion_categorie_ajout') }}" class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Ajouter une catégorie</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+				</div>
+				<div class="modal-body">
+					<label class="form-label">Libellé</label>
+					<input type="text" name="libelle" class="form-control" required>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+					<button type="submit" class="btn btn-primary">Ajouter</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="modal fade" id="modifCategorieModal" tabindex="-1" aria-labelledby="modifCategorieModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<form method="POST" id="formModifCategorie" class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Modifier une catégorie</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+				</div>
+				<div class="modal-body">
+					<label class="form-label">Libellé</label>
+					<input type="text" name="modif-libelle" id="modif-libelle" class="form-control" required>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+					<button type="submit" class="btn btn-primary">Modifier</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{% endblock %}

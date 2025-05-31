@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Livret;
+use App\Entity\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,16 @@ class LivretRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Livret::class);
+    }
+
+    public function nbrLivret(Utilisateur $utilisateur): int
+    {
+        return $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->where('p.utilisateur = :user')
+            ->setParameter('user', $utilisateur)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     //    /**

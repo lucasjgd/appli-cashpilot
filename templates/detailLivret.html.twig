@@ -184,7 +184,6 @@
 				{% for avoir in avoirs %}
 					{% set categorie = avoir.categorie %}
 
-					{# Compter le nombre de dépenses dans la période #}
 					{% set nbDepenses = 0 %}
 					{% for depense in categorie.depenses %}
 						{% if depense.livret.id == livret.id and depense.date >= dateDebut and depense.date < dateFin %}
@@ -192,7 +191,6 @@
 						{% endif %}
 					{% endfor %}
 
-					{# Vérifie si la catégorie doit être affichée #}
 					{% if avoir.estActif and (not periodeEstDansLePasse or nbDepenses > 0) %}
 						{% set auMoinsUneCategorieAffichee = true %}
 						<div class="accordion-item">

@@ -16,6 +16,27 @@ class UtilisateurRepository extends ServiceEntityRepository
         parent::__construct($registry, Utilisateur::class);
     }
 
+    public function orderByRole(): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = 'SELECT * FROM utilisateur ORDER BY role ASC';
+
+        $stmt = $conn->prepare($sql);
+        $resultat = $stmt->executeQuery();
+
+        $utilisateurs = $resultat->fetchAllAssociative();
+
+        $lesUtilisateurs = [];
+        $em = $this->getEntityManager();
+
+        foreach ($utilisateurs as $utilisateur) {
+            $lesUtilisateurs[] = $em->getRepository(Utilisateur::class)->find($utilisateur['id']);
+        }
+
+        return $lesUtilisateurs;
+    }
+
     //    /**
     //     * @return Utilisateur[] Returns an array of Utilisateur objects
     //     */

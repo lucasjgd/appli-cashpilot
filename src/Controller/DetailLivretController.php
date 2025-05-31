@@ -22,7 +22,7 @@ final class DetailLivretController extends AbstractController
         if (!$livret) {
             throw $this->createNotFoundException('Livret non trouvé');
         }
-
+        date_default_timezone_set('Europe/Paris');
         $mois = $request->query->getInt('mois', (int) date('m'));
         $annee = $request->query->getInt('annee', (int) date('Y'));
 
@@ -38,7 +38,6 @@ final class DetailLivretController extends AbstractController
         $avoirs = $livret->getAvoirs();
         $avoirsParNom = [];
 
-        // Constitution de la liste des avoirs filtrés sur le libellé
         foreach ($avoirs as $avoir) {
             $categorie = $avoir->getCategorie();
             $nomCategorie = strtolower(trim($categorie->getLibelle()));
@@ -79,7 +78,7 @@ final class DetailLivretController extends AbstractController
 
         $categoriesDisponibles = [];
         foreach ($categoriesToutes as $categorie) {
-           
+
 
             $estDejaUtilisee = false;
 

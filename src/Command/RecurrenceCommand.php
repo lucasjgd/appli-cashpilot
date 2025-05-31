@@ -47,11 +47,7 @@ class RecurrenceCommand extends Command
 
         foreach ($depenses as $depense) {
             if ($depense->estRecurrente()) {
-                $nouvelleDate = new \DateTime("$anneeActuelle-$moisActuel-" . $depense->getDate()->format('d'));
-
-                if (!checkdate((int) $nouvelleDate->format('m'), (int) $nouvelleDate->format('d'), (int) $nouvelleDate->format('Y'))) {
-                    $nouvelleDate->modify('last day of this month');
-                }
+                $nouvelleDate = new \DateTime("$anneeActuelle-$moisActuel-01");
 
                 $nouvelleDepense = new Depense();
                 $nouvelleDepense->setMontantDepense($depense->getMontant());

@@ -80,5 +80,16 @@ class Utilisateur implements PasswordAuthenticatedUserInterface
     {
         return $this->livrets;
     }
+
+    public function getRole(): string
+    {
+        return strtolower((new \ReflectionClass($this))->getShortName());
+    }
+
+    public function setRole(string $role): static
+    {
+        $this->role = $role;
+        return $this;
+    }
 }
 

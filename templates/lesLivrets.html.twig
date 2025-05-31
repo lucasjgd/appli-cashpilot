@@ -39,7 +39,7 @@
 										<i class="fa-solid fa-pencil"></i>
 									</button>
 
-									<a href="{{ path('supprimerLivret', {id: livret.id}) }}" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2">
+									<a href="{{ path('supprimerLivret', {id: livret.id}) }}" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2" onsubmit="return confirm('Êtes-vous sûr de supprimer ce livret ? Cela engendrera la suppression des catégories et dépenses associées.');">
 										<i class="fa-solid fa-xmark"></i>
 									</a>
 									

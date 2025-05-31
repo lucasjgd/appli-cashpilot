@@ -9,6 +9,12 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
+#[ORM\InheritanceType("SINGLE_TABLE")]
+#[ORM\DiscriminatorColumn(name: "role", type: "string")]
+#[ORM\DiscriminatorMap([
+    "client" => Client::class,
+    "admin" => Admin::class
+])]
 class Utilisateur implements PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]

@@ -18,7 +18,13 @@ final class DetailLivretController extends AbstractController
     #[Route('/lesLivrets/{id}/detail', name: 'detailLivret')]
     public function detail(int $id, Request $request, EntityManagerInterface $em): Response
     {
+        $utilisateur = $request->getSession()->get('utilisateur');
         $livret = $em->getRepository(Livret::class)->find($id);
+
+        if (!$utilisateur || $livret->getUtilisateur()->getId() !== $utilisateur['id']) {
+            return $this->redirectToRoute('lesLivrets');
+        }
+
         if (!$livret) {
             throw $this->createNotFoundException('Livret non trouvé');
         }

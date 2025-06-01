@@ -8,13 +8,19 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\Request;
 
 final class AnalyseLivretController extends AbstractController
 {
     #[Route('/lesLivrets/{id}/detail/analyse', name: 'analyse')]
-    public function analyse(int $id, EntityManagerInterface $em): Response
+    public function analyse(int $id, EntityManagerInterface $em, Request $request): Response
     {
         $livret = $em->getRepository(Livret::class)->find($id);
+        $utilisateur = $request->getSession()->get('utilisateur');
+
+        if (!$utilisateur || $livret->getUtilisateur()->getId() !== $utilisateur['id']) {
+            return $this->redirectToRoute('lesLivrets');
+        }
 
         if (!$livret) {
             $this->addFlash('danger', 'Données invalides.');
@@ -23,17 +29,17 @@ final class AnalyseLivretController extends AbstractController
 
         $donnees = $em->getRepository(Depense::class)->getSommeParCategorieParLivret($id);
 
-        $labels = [];
+        $libelles = [];
         $montants = [];
 
-        foreach ($donnees as $row) {
-            $labels[] = $row['categorie'];
-            $montants[] = $row['total'];
+        foreach ($donnees as $d) {
+            $libelles[] = $d['categorie'];
+            $montants[] = $d['total'];
         }
 
         return $this->render('analyseLivret.html.twig', [
             'livret' => $livret,
-            'labels' => json_encode($labels),
+            'libelles' => json_encode($libelles),
             'montants' => json_encode($montants),
         ]);
     }

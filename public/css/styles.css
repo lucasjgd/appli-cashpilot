@@ -1,3 +1,7 @@
+html {
+    font-size: clamp(10px, 2vw, 16px);
+}
+
 body {
     background-color: #faf7f6;
     display: flex;
@@ -35,15 +39,6 @@ header {
 
 .content {
     flex: 1;
-}
-
-.card {
-    width: 500px;
-}
-
-#listeLivrets {
-    display: grid;
-    grid-template-columns: repeat(2,1fr);
 }
 
 a {
@@ -94,4 +89,87 @@ footer {
     position: relative;
     width: 100%;
 }
+
+.card {
+    width: 300px;
+    margin: 0 auto;
+}
+
+#listeLivrets {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 576px) {
+    #listeLivrets {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    strong {
+        white-space: nowrap;
+        margin-right: 50%;
+    }
+}
+
+@media (min-width: 1025px) {
+    #listeLivrets {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    strong {
+        white-space: nowrap;
+        margin-right: 50%;
+    }
+}
+
+.container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.btn {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+    .d-flex.flex-row.align-items-center.justify-content-between {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .d-flex.flex-row.align-items-center.justify-content-between .btn {
+        width: 100%;
+    }
+
+    strong {
+        white-space: nowrap;
+        margin-right: 50%;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .accueil-content {
+        flex-direction: column-reverse;
+        justify-content: center !important;
+        gap: 40px;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .accueil-content .logo-img {
+        width: 80% !important;
+    }
+
+    .accueil-content .text-zone h2 {
+        font-size: 22px !important;
+    }
+
+    .accueil-content .text-zone a {
+        font-size: 16px !important;
+    }
+}
+
 

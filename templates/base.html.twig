@@ -17,64 +17,64 @@
 
 	</head>
 	<body>
-		<header class="text-white py-3">
-			<div class="container d-flex justify-content-between align-items-center">
-				<h1 class="m-0">CashPilot</h1>
-				<nav>
-					<ul class="nav align-items-center">
-						{% if app.session.get('utilisateur') %}
-							{% set role = app.session.get('utilisateur').role|lower %}
-							{% if role == "client" %}
+		<header class="text-white py-3 bg-green">
+			<nav class="navbar navbar-expand-lg navbar-dark">
+				<div class="container">
+					<a class="navbar-brand" href="#">CashPilot</a>
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+
+					<div class="collapse navbar-collapse" id="mainNavbar">
+						<ul class="navbar-nav ms-auto">
+							{% if app.session.get('utilisateur') %}
+								{% set role = app.session.get('utilisateur').role|lower %}
+								{% if role == "client" %}
+									<li class="nav-item">
+										<a class="nav-link text-white" href="{{ path('deconnexion') }}">Déconnexion</a>
+									</li>
+								{% endif %}
+								{% if role == "admin" %}
+									<li class="nav-item">
+										<a class="nav-link text-white" href="{{ path('lesLivrets') }}">Mes livrets</a>
+									</li>
+									<li class="nav-item dropdown">
+										<a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+											Gestion
+										</a>
+										<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+											<li>
+												<a class="dropdown-item" href="{{ path('gestion_categorie') }}">Gestion des catégories</a>
+											</li>
+											<li>
+												<a class="dropdown-item" href="{{ path('gestion_utilisateur') }}">Gestion des utilisateurs</a>
+											</li>
+										</ul>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link text-white" href="{{ path('deconnexion') }}">Déconnexion</a>
+									</li>
+								{% endif %}
+							{% else %}
 								<li class="nav-item">
-									<a class="nav-link text-white" href="{{ path('deconnexion') }}">
-										Déconnexion
-									</a>
+									<a class="nav-link text-white" href="{{ path('index') }}">Accueil</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link text-white" href="{{ path('connexion') }}">Se connecter</a>
 								</li>
 							{% endif %}
-							{% if role == "admin" %}
-								<li class="nav-item">
-									<a class="nav-link text-white" href="{{ path('lesLivrets') }}">
-										Mes livrets
-									</a>
-								</li>
-								<li class="nav-item dropdown">
-									<a class="nav-link text-white dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-										Gestion
-									</a>
-									<ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-										<li>
-											<a class="dropdown-item" href="{{ path('gestion_categorie') }}">Gestion des catégories</a>
-										</li>
-										<li>
-											<a class="dropdown-item" href="{{ path('gestion_utilisateur') }}">Gestion des utilisateurs</a>
-										</li>
-									</ul>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link text-white" href="{{ path('deconnexion') }}">
-										Déconnexion
-									</a>
-								</li>
-							{% endif %}
-						{% else %}
-							<li class="nav-item">
-								<a class="nav-link text-white" href="{{ path('index') }}">Accueil</a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link text-white" href="{{ path('connexion') }}">
-									Se connecter
-								</a>
-							</li>
-						{% endif %}
-					</ul>
-				</nav>
-			</div>
+						</ul>
+					</div>
+				</div>
+			</nav>
 		</header>
 		{% block body %}{% endblock %}
 		<script src="{{ asset('js/modifLivretModal.js') }}"></script>
 		<script src="{{ asset('js/modifDepenseModal.js') }}"></script>
 		<script src="{{ asset('js/modifCategorieModal.js') }}"></script>
 		<script src="{{ asset('js/modifUtilisateurModal.js') }}"></script>
+		<script src="{{ asset('js/analyse.js') }}"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
 		<footer class="d-flex align-items-center flex-row justify-content-around p-3">

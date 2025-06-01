@@ -7,6 +7,7 @@ use App\Entity\Depense;
 use App\Entity\Avoir;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -32,7 +33,7 @@ final class LesLivretsController extends AbstractController
     }
 
     #[Route('/ajouterLivret', name: 'ajouterLivret', methods: ['POST'])]
-    public function ajouterLivret(Request $request, EntityManagerInterface $em, SessionInterface $session): Response
+    public function ajouterLivret(Request $request, EntityManagerInterface $em, SessionInterface $session, LoggerInterface $logs): Response
     {
         $nomLivret = $request->request->get('nom_livret');
 
@@ -55,12 +56,18 @@ final class LesLivretsController extends AbstractController
         $em->persist($livret);
         $em->flush();
 
+        $logs->info('Livret ajouté', [
+            'date' => new \DateTime(),
+            'utilisateur_id' => $utilisateur->getId(),
+            'livret_id' => $livret->getId(),
+        ]);
+
         $this->addFlash('success', "Livret ajouté avec succès !");
         return $this->redirectToRoute('lesLivrets');
     }
 
     #[Route('/modifierLivret/{id}', name: 'modifierLivret', methods: ['POST'])]
-    public function modifierLivret(int $id, Request $request, EntityManagerInterface $em): Response
+    public function modifierLivret(int $id, Request $request, EntityManagerInterface $em, LoggerInterface $logs): Response
     {
         $livret = $em->getRepository(Livret::class)->find($id);
         if (!$livret) {
@@ -77,11 +84,17 @@ final class LesLivretsController extends AbstractController
         $livret->setNom($nom);
         $em->flush();
 
+        $logs->info('Livret modifié', [
+            'date' => new \DateTime(),
+            'utilisateur_id' => $livret->getUtilisateur()->getId(),
+            'livret_id' => $livret->getId(),
+        ]);
+
         $this->addFlash('success', "Livret modifié avec succès !");
         return $this->redirectToRoute('lesLivrets');
     }
     #[Route('/supprimerLivret/{id}', name: 'supprimerLivret', methods: ['GET'])]
-    public function supprimerLivret(int $id, Request $request, EntityManagerInterface $em): Response
+    public function supprimerLivret(int $id, EntityManagerInterface $em, LoggerInterface $logs): Response
     {
         $livret = $em->getRepository(Livret::class)->find($id);
 
@@ -101,7 +114,13 @@ final class LesLivretsController extends AbstractController
         }
         $em->flush();
 
-        $this->addFlash('success', "Livret supprimé avec succès !");
+        $logs->info('Livret supprimé', [
+            'date' => new \DateTime(),
+            'utilisateur_id' => $livret->getUtilisateur()->getId(),
+            'livret_id' => $livret->getId(),
+        ]);
+
+        $this->addFlash('success', "Livret supprimé avec succès. Dépenses et catégories associées de même.");
         return $this->redirectToRoute('lesLivrets');
     }
 }

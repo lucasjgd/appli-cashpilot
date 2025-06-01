@@ -48,6 +48,11 @@ class Livret
         return $this;
     }
 
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
     public function getAvoirs()
     {
         return $this->avoirs;

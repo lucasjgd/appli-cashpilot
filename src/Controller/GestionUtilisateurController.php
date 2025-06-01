@@ -20,6 +20,11 @@ final class GestionUtilisateurController extends AbstractController
     #[Route('/gestion_utilisateur', name: 'gestion_utilisateur')]
     public function index(EntityManagerInterface $entityManager, PaginatorInterface $pagination, Request $request): Response
     {
+        $utilisateur = $request->getSession()->get('utilisateur');
+        if (!$utilisateur || strtolower($utilisateur['role']) !== 'admin') {
+            return $this->redirectToRoute('lesLivrets');
+        }
+        
         $utilisateurs = $entityManager->getRepository(Utilisateur::class)->orderByRole();
 
         $utilisateursPagination = $pagination->paginate(

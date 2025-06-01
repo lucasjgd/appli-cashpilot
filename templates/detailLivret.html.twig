@@ -22,12 +22,20 @@
 						{{ livret.nomLivret }}</h2>
 				</div>
 				<div>
-					<div class="container text-center my-4">
-						{% if estMoisActuelOuFutur %}
-							<button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addCategorieModal">Ajouter une catégorie</button>
-							<button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addDepenseModal">Ajouter une dépense</button>
-						{% endif %}
-						<a href="{{ path('analyse', {id: livret.id}) }}" class="btn btn-primary">Analyse du livret</a>
+					<div class="container my-4">
+						<div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-2 text-center">
+							{% if estMoisActuelOuFutur %}
+								<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategorieModal">
+									Ajouter une catégorie
+								</button>
+								<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDepenseModal">
+									Ajouter une dépense
+								</button>
+							{% endif %}
+							<a href="{{ path('analyse', {id: livret.id}) }}" class="btn btn-primary">
+								Analyse du livret
+							</a>
+						</div>
 					</div>
 
 					<div class="modal fade" id="addCategorieModal" tabindex="-1" aria-labelledby="addCategorieModalLabel" aria-hidden="true">

@@ -5,13 +5,15 @@
 
 {% block body %}
 
-	<main class="container d-flex align-items-center justify-content-around m-4 content">
-        <img src="{{ asset('images/logo.png') }}" alt="Logo CashPilot" class="me-4 h-auto w-25">
-        <div class = "align-items-center d-flex flex-column">
-            <h2>Bienvenue sur CashPilot !</h2>
-            <p>Application de gestion des finances personnelles </p>
-            <a href="{{ path('connexion') }}" class="btn btn-primary">Se connecter</a>
-        </div>
-    </main>
+	<main class="container d-flex align-items-center justify-content-around content accueil-content">
+		<img src="/images/logo.png" alt="Logo CashPilot" class="h-auto w-25 logo-img">
+
+		<div class="align-items-center d-flex flex-column text-zone">
+			<h2>Bienvenue sur CashPilot !</h2>
+			<p>Application de gestion des finances personnelles
+			</p>
+			<a href="/connexion" class="btn btn-primary">Se connecter</a>
+		</div>
+	</main>
 
 {% endblock %}

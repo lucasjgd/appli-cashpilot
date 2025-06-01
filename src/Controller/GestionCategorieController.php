@@ -13,8 +13,13 @@ use Symfony\Component\Routing\Attribute\Route;
 final class GestionCategorieController extends AbstractController
 {
     #[Route('/gestion_categorie', name: 'gestion_categorie')]
-    public function index(EntityManagerInterface $em): Response
+    public function index(Request $request, EntityManagerInterface $em): Response
     {
+        $utilisateur = $request->getSession()->get('utilisateur');
+        if (!$utilisateur || strtolower($utilisateur['role']) !== 'admin') {
+            return $this->redirectToRoute('lesLivrets');
+        }
+        
         $categories = $em->getRepository(Categorie::class)->categOrdreAsc();
 
         return $this->render('gestion_categorie.html.twig', [

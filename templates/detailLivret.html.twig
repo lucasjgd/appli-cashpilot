@@ -275,7 +275,7 @@
 											{% if depense.livret.id == livret.id and depense.date >= dateDebut and depense.date < dateFin %}
 												{% set depenseAffichee = true %}
 												<li class="list-group-item d-flex justify-content-between align-items-start">
-													<div class="w-25">
+													<div class="w-75">
 														<div class="d-flex justify-content-between align-items-center">
 															<strong>{{ depense.description }}</strong>
 															<span class="badge bg-secondary rounded-pill fs-6">
@@ -284,9 +284,32 @@
 															</span>
 														</div>
 														<div class="d-flex flex-column">
-															<small class="text-muted">Date :
+															<small class="text-muted">Date de la dépense :
 																{{ depense.date|date('Y-m-d') }}</small>
 														</div>
+														{% if depense.recurrence %}
+															{% set prochaineDate = depense.date|date_modify('+' ~ depense.recurrence.frequence ~ ' days') %}
+															{% set aujourdHui = "now"|date("Y-m-d") %}
+															{% set interval = prochaineDate.diff(date(aujourdHui)) %}
+															{% set joursRestants = interval.days %}
+
+															<div class="d-flex flex-column">
+																{% if prochaineDate > "now"|date %}
+																	<small class="text-muted">
+																		Dépense récurrente – Prochaine dans
+																		{{ joursRestants }}
+																		jour(s).
+																	</small>
+																	<small class="text-muted">
+																		Date début : {{ depense.recurrence.dateDebut|date('d-m-Y') }}
+																	</small>
+																	<small class="text-muted">
+																		Date fin : {{ depense.recurrence.dateFin|date('d-m-Y') }}
+																	</small>
+																{% endif %}
+															</div>
+														{% endif %}
+
 													</div>
 													<div>
 														{% if estMoisActuelOuFutur %}

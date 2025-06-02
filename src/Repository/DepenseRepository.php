@@ -40,6 +40,32 @@ class DepenseRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findDepensesRecurrentesDuJour(): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = "
+        SELECT d.id AS depense_id, 
+               r.id AS recurrence_id, 
+               r.frequence, 
+               d.date_depense AS date_depense, 
+               r.date_debut, 
+               r.date_fin, 
+               d.montant_depense, 
+               d.description_depense, 
+               d.categorie_id, 
+               d.livret_id
+        FROM depense d
+        JOIN recurrence r ON d.id = r.depense_id
+        WHERE DATE_ADD(d.date_depense, INTERVAL r.frequence DAY) = CURRENT_DATE()
+        AND CURRENT_DATE() BETWEEN r.date_debut AND r.date_fin
+    ";
+
+        return $conn->executeQuery($sql)->fetchAllAssociative();
+    }
+
+
+
 
     //    /**
     //     * @return Depense[] Returns an array of Depense objects

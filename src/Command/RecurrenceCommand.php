@@ -13,13 +13,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'app:depense-recurrente',
-    description: 'Gère les dépenses récurrentes chaque 1er du mois'
+    description: 'Gère les dépenses récurrentes automatiquement'
 )]
 class RecurrenceCommand extends Command
 {
     private EntityManagerInterface $em;
     private DepenseRepository $depenseRepo;
-
 
     public function __construct(EntityManagerInterface $em, DepenseRepository $depenseRepo)
     {
@@ -30,43 +29,29 @@ class RecurrenceCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        date_default_timezone_set('Europe/Paris');
-        $maintenant = new \DateTime();
-        $moisActuel = (int) $maintenant->format('m');
-        $anneeActuelle = (int) $maintenant->format('Y');
+        $results = $this->depenseRepo->findDepensesRecurrentesDuJour();
 
-        $moisPrecedent = $moisActuel === 1 ? 12 : $moisActuel - 1;
-        $anneePrecedente = $moisActuel === 1 ? $anneeActuelle - 1 : $anneeActuelle;
+        foreach ($results as $index => $row) {
+            $output->writeln("Dépense #$index : " . json_encode($row));
+            $nouvelleDepense = new Depense();
+            $nouvelleDepense->setMontantDepense($row['montant_depense']);
+            $nouvelleDepense->setDescriptionDepense($row['description_depense']);
+            $nouvelleDepense->setDateDepense(new \DateTime()); 
+            $nouvelleDepense->setCategorie($this->em->getReference('App\Entity\Categorie', $row['categorie_id']));
+            $nouvelleDepense->setLivret($this->em->getReference('App\Entity\Livret', $row['livret_id']));
 
-        $dateDebut = new \DateTime("$anneePrecedente-$moisPrecedent-01");
-        $dateFin = (clone $dateDebut)->modify('+1 month');
-
-        $output->writeln("Traitement des dépenses du $moisPrecedent/$anneePrecedente...");
-
-        $depenses = $this->depenseRepo->depensesDuMois($dateDebut, $dateFin);
-
-        foreach ($depenses as $depense) {
-            if ($depense->estRecurrente()) {
-                $nouvelleDate = new \DateTime("$anneeActuelle-$moisActuel-01");
-
-                $nouvelleDepense = new Depense();
-                $nouvelleDepense->setMontantDepense($depense->getMontant());
-                $nouvelleDepense->setDescriptionDepense($depense->getDescription());
-                $nouvelleDepense->setDateDepense($nouvelleDate);
-                $nouvelleDepense->setLivret($depense->getLivret());
-                $nouvelleDepense->setCategorie($depense->getCategorie());
-                $nouvelleDepense->setEstRecurrente(true);
-
-                $this->em->persist($nouvelleDepense);
-
-                $output->writeln("Dépense récurrente faites pour le " . $nouvelleDate->format('d/m/Y'));
+            $this->em->persist($nouvelleDepense);
+            $this->em->flush(); 
+            $recurrence = $this->em->getRepository(Recurrence::class)->find($row['recurrence_id']);
+            if ($recurrence) {
+                $recurrence->setDepense($nouvelleDepense);
+                $this->em->persist($recurrence);
             }
         }
 
         $this->em->flush();
 
-        $output->writeln("Traitement terminé pour le " . $maintenant->format('d/m/Y'));
-
+        $output->writeln("Dépenses récurrentes générées et mises à jour avec succès.");
         return Command::SUCCESS;
     }
 }

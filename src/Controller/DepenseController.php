@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Livret;
 use App\Entity\Categorie;
 use App\Entity\Depense;
+use App\Entity\Recurrence;
 use DateTime;
 
 final class DepenseController extends AbstractController
@@ -42,12 +43,24 @@ final class DepenseController extends AbstractController
         $depense->setMontantDepense((float) $montant);
         $depense->setDescriptionDepense($description);
         $depense->setDateDepense(new \DateTime());
-        if (!$recurrente) {
-            $depense->setEstRecurrente(0);
-        } else {
-            $depense->setEstRecurrente($recurrente);
-        }
 
+        if ($recurrente) {
+            $frequence = $request->request->get('frequence');
+            $dateDebut = new \DateTime($request->request->get('date_debut'));
+            $dateFin = null;
+            if ($request->request->get('date_fin')) {
+                $dateFin = new \DateTime($request->request->get('date_fin'));
+            }
+
+            $recurrence = new Recurrence();
+            $recurrence->setFrequence($frequence);
+            $recurrence->setDateDebut($dateDebut);
+            $recurrence->setDateFin($dateFin);
+            $recurrence->setDepense($depense);
+
+            $depense->setRecurrence($recurrence);
+            $em->persist($recurrence);
+        }
 
         $em->persist($depense);
         $em->flush();
@@ -56,6 +69,7 @@ final class DepenseController extends AbstractController
 
         return $this->redirectToRoute('detailLivret', ['id' => $idLivret]);
     }
+
 
     #[Route('/modifierDepense/{id}', name: 'modifierDepense', methods: ['POST'])]
     public function modifierDepense(int $id, Request $request, EntityManagerInterface $em): Response
@@ -67,9 +81,9 @@ final class DepenseController extends AbstractController
             return $this->redirectToRoute('detailLivret', ['id' => $depense->getLivret()->getId()]);
         }
 
-        $montant = $request->request->get('montant');
-        $description = $request->request->get('description');
-        $recurrente = $request->request->get('recurrente');
+        $montant = $request->request->get('modifMontantDepense');
+        $description = $request->request->get('modifDescriptionDepense');
+        $recurrente = $request->request->get('modifRecurrenteDepense');
 
         if (!$montant || !$description) {
             $this->addFlash('danger', 'Tous les champs sont obligatoires.');
@@ -78,7 +92,37 @@ final class DepenseController extends AbstractController
 
         $depense->setMontantDepense((float) $montant);
         $depense->setDescriptionDepense($description);
-        $depense->setEstRecurrente((bool) $recurrente);
+
+        if ($recurrente) {
+            $recurrence = $depense->getRecurrence() ?: new Recurrence();
+
+            $frequenceInput = $request->request->get('frequenceModif');
+            $dateDebutInput = $request->request->get('date_debut_modif');
+            $dateFinInput = $request->request->get('date_fin_modif');
+
+            if ($frequenceInput) {
+                $recurrence->setFrequence((int) $frequenceInput);
+            }
+
+            if ($dateDebutInput) {
+                $recurrence->setDateDebut(new \DateTime($dateDebutInput));
+            }
+
+            if ($dateFinInput) {
+                $recurrence->setDateFin(new \DateTime($dateFinInput));
+            } else {
+                $recurrence->setDateFin(null); 
+            }
+
+            $recurrence->setDepense($depense);
+            $depense->setRecurrence($recurrence);
+            $em->persist($recurrence);
+        } else {
+            $recurrence = $depense->getRecurrence();
+            if ($recurrence) {
+                $em->remove($recurrence);
+            }
+        }
 
         $em->flush();
 

@@ -30,8 +30,8 @@ class Depense
     #[ORM\JoinColumn(nullable: false)]
     private ?Categorie $categorie = null;
 
-    #[ORM\Column(type: "boolean")]
-    private bool $estRecurrente = false;
+    #[ORM\OneToOne(mappedBy: "depense", cascade: ["persist", "remove"])]
+    private ?Recurrence $recurrence = null;
 
     public function getId(): ?int
     {
@@ -93,14 +93,19 @@ class Depense
         return $this;
     }
 
-    public function estRecurrente(): bool
+    public function getRecurrence(): ?Recurrence
     {
-        return $this->estRecurrente;
+        return $this->recurrence;
     }
 
-    public function setEstRecurrente(bool $estRecurrente): self
+    public function setRecurrence(?Recurrence $recurrence): self
     {
-        $this->estRecurrente = $estRecurrente;
+        if ($recurrence !== null && $recurrence->getDepense() !== $this) {
+            $recurrence->setDepense($this);
+        }
+
+        $this->recurrence = $recurrence;
+
         return $this;
     }
 }

@@ -289,27 +289,39 @@
 														</div>
 														{% if depense.recurrence %}
 															{% set prochaineDate = depense.date|date_modify('+' ~ depense.recurrence.frequence ~ ' days') %}
-															{% set aujourdHui = "now"|date("Y-m-d") %}
+															{% set aujourdHui = "now"|date("Y-m-d")|date %}
 															{% set interval = prochaineDate.diff(date(aujourdHui)) %}
 															{% set joursRestants = interval.days %}
 
 															<div class="d-flex flex-column">
-																{% if prochaineDate > "now"|date %}
+																{% if prochaineDate <= depense.recurrence.dateFin %}
+																	{% if prochaineDate > aujourdHui %}
+																		<small class="text-muted">
+																			Dépense récurrente – Prochaine dans
+																			{{ joursRestants }}
+																			jour(s).
+																		</small>
+																		<small class="text-muted">
+																			Date début :
+																			{{ depense.recurrence.dateDebut|date('d-m-Y') }}
+																		</small>
+																		<small class="text-muted">
+																			Date fin :
+																			{{ depense.recurrence.dateFin|date('d-m-Y') }}
+																		</small>
+																	{% else %}
+																		<small class="text-muted">
+																			Prochaine occurrence aujourd’hui ou déjà passée.
+																		</small>
+																	{% endif %}
+																{% else %}
 																	<small class="text-muted">
-																		Dépense récurrente – Prochaine dans
-																		{{ joursRestants }}
-																		jour(s).
-																	</small>
-																	<small class="text-muted">
-																		Date début : {{ depense.recurrence.dateDebut|date('d-m-Y') }}
-																	</small>
-																	<small class="text-muted">
-																		Date fin : {{ depense.recurrence.dateFin|date('d-m-Y') }}
+																		Dépense récurrente terminée le
+																		{{ depense.recurrence.dateFin|date('d-m-Y') }}
 																	</small>
 																{% endif %}
 															</div>
 														{% endif %}
-
 													</div>
 													<div>
 														{% if estMoisActuelOuFutur %}

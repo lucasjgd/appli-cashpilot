@@ -71,7 +71,6 @@ final class CategorieController extends AbstractController
             }
         }
 
-        // Si aucune catégorie désactivée ne porte ce nom, on ajoute normalement celle sélectionnée
         $avoir = new Avoir();
         $avoir->setLivret($livret);
         $avoir->setCategorie($selectedCategorie);
